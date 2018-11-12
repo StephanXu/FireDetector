@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef VIDEOANALYSER_H
-#define VIDEOANALYSER_H
+#ifndef VIDEOANALYSER_HPP
+#define VIDEOANALYSER_HPP
 
 #include <string>
 #include <queue>

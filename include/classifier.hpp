@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef CLASSIFIER_H
-#define CLASSIFIER_H
+#ifndef CLASSIFIER_HPP
+#define CLASSIFIER_HPP
 
 #include <string>
 #include <vector>
