@@ -9,6 +9,7 @@
 
 using namespace caffe;
 using namespace cv;
+using namespace std;
 
 Cclassifier::Cclassifier(const std::string &deploy_file,
                          const std::string &caffemodel,
@@ -36,29 +37,75 @@ Cclassifier::Cclassifier(const std::string &deploy_file,
 
 std::vector<float> Cclassifier::Classify(const cv::Mat &img)
 {
-    Blob<float>* input_layer = _net->input_blobs()[0];
+    Blob<float> *input_layer = _net->input_blobs()[0];
     input_layer->Reshape(1, _num_channels, _input_geometry.height, _input_geometry.width);
     _net->Reshape();
 
     //init img here...
+    int width = input_layer->width();
+    int height = input_layer->height();
     std::vector<cv::Mat> input_channels;
     float *input_data = input_layer->mutable_cpu_data();
     for (int i = 0; i < input_layer->channels(); ++i)
     {
-        Mat channel(_input_geometry.height, _input_geometry.width, CV_32FC1, input_data);
+        Mat channel(height, width, CV_32FC1, input_data);
         input_channels.push_back(channel);
-        input_data += _input_geometry.width * _input_geometry.height;
+        input_data += width * height;
     } //这个for循环将网络的输入blob同input_channels关联起来
+
+    // make a resized copy for data
+    cv::Mat img_resized;
+    if (img.size() != _input_geometry)
+    {
+        cv::resize(img, img_resized, _input_geometry);
+    }
+    else
+    {
+        img_resized = img;
+    }
+
     Mat sample_float;
-    img.convertTo(sample_float, CV_32FC3);
+    img_resized.convertTo(sample_float, CV_32FC3);
     Mat sample_normalized;
-    cv::subtract(sample_float, Scalar(129.52675, 128.78506, 116.44242), sample_normalized); //减去均值，均值可以自己求，也可以通过.binaryproto均值文件求出
-    cv::split(sample_normalized, input_channels);                                          //将输入图片放入input_channels，即放入了网络的输入blob
+    // cv::subtract(sample_float, Scalar(123.546283f, 112.177800f, 102.878753f), sample_normalized); //减去均值，均值可以自己求，也可以通过.binaryproto均值文件求出
+    cv::subtract(sample_float, _mean, sample_normalized);
+    cv::split(sample_normalized, input_channels);                                                 //将输入图片放入input_channels，即放入了网络的输入blob
 
     _net->Forward();
-    Blob<float>* output_layer = _net->output_blobs()[0];
+    Blob<float> *output_layer = _net->output_blobs()[0];
     const float *begin = output_layer->cpu_data(); //[ATTENTION] WHY???
     const float *end = begin + output_layer->channels();
 
     return std::vector<float>(begin, end);
+}
+
+/* Load the mean file in binaryproto format. */
+void Cclassifier::SetMean(const std::string &mean_file)
+{
+    BlobProto blob_proto;
+    ReadProtoFromBinaryFileOrDie(mean_file.c_str(), &blob_proto);
+
+    /* Convert from BlobProto to Blob<float> */
+    Blob<float> mean_blob;
+    mean_blob.FromProto(blob_proto);
+
+    /* The format of the mean file is planar 32-bit float BGR or grayscale. */
+    std::vector<cv::Mat> channels;
+    float *data = mean_blob.mutable_cpu_data();
+    for (int i = 0; i < _num_channels; ++i)
+    {
+        /* Extract an individual channel. */
+        cv::Mat channel(mean_blob.height(), mean_blob.width(), CV_32FC1, data);
+        channels.push_back(channel);
+        data += mean_blob.height() * mean_blob.width();
+    }
+
+    /* Merge the separate channels into a single image. */
+    cv::Mat mean;
+    cv::merge(channels, mean);
+
+    /* Compute the global mean pixel value and create a mean image
+   * filled with this value. */
+    cv::Scalar channel_mean = cv::mean(mean);
+    _mean = cv::Mat(_input_geometry, mean.type(), channel_mean);
 }

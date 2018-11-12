@@ -21,6 +21,8 @@ class Cclassifier
 
     std::vector<float> Classify(const cv::Mat &img);
 
+    void SetMean(const std::string &mean_file);
+
   private:
     // network
     std::shared_ptr<caffe::Net<float>> _net;
@@ -30,6 +32,8 @@ class Cclassifier
     int _num_channels;
     // all labels
     std::vector<std::string> _labels;
+
+    cv::Mat _mean;
 };
 
 #endif
