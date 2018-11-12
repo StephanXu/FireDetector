@@ -5,6 +5,7 @@
 
 #include <string>
 #include <vector>
+#include <sstream>
 #include <functional>
 class CprogressBar
 {
@@ -41,7 +42,12 @@ class CprogressBar
 			Loading... |████████████████████████████████| 100% ETA:0
 	*/
     template <typename refreshT, typename sufT2>
-    std::string update(refreshT const &refresh_proc, sufT2 const &suffix_proc);
+    std::string update(refreshT const &refresh_proc, sufT2 const &suffix_proc)
+    {
+        std::stringstream ss;
+        ss << generate_bar(refresh_proc()) << suffix_proc() << "\r";
+        return ss.str();
+    }
 
     void set_message(std::string str);
 

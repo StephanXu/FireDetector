@@ -44,11 +44,3 @@ std::string CprogressBar::generate_bar(double _value)
     ss << static_cast<int>((_value)*100) << "%";
     return ss.str();
 }
-
-template <typename refreshT, typename sufT2>
-std::string CprogressBar::update(refreshT const &refresh_proc, sufT2 const &suffix_proc)
-{
-    std::stringstream ss;
-    ss << generate_bar(refresh_proc()) << suffix_proc() << "\r";
-    return ss.str();
-}
