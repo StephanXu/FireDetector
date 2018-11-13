@@ -3,13 +3,15 @@
 #include <vector>
 #include <sstream>
 #include <functional>
-
+#include <iostream>
 CprogressBar::CprogressBar()
+    : _msg(""), _pthread(nullptr)
 {
     ;
 }
 
 CprogressBar::CprogressBar(std::string message)
+    : _msg(""), _pthread(nullptr)
 {
     set_message(message);
 }
@@ -35,8 +37,7 @@ std::string CprogressBar::generate_bar(double _value)
     //generate string
     for (int i{}; i < full_len; i++)
         ss << fill.back();
-    if (unfull_char_index > 0)
-        ss << fill[unfull_char_index];
+    ss << fill[unfull_char_index];
     if (0 < empty_len - 1)
         for (int i{}; i < empty_len; i++)
             ss << empty_fill;
@@ -44,3 +45,11 @@ std::string CprogressBar::generate_bar(double _value)
     ss << static_cast<int>((_value)*100) << "%";
     return ss.str();
 }
+
+// template <typename refreshT, typename sufT2>
+// std::string CprogressBar::update(refreshT const &refresh_proc, sufT2 const &suffix_proc)
+// {
+//     std::stringstream ss;
+//     ss << generate_bar(refresh_proc()) << suffix_proc() << "\r";
+//     return ss.str();
+// }

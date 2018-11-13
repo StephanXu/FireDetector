@@ -1,5 +1,5 @@
 //main.cpp
-#include "opencv2/opencv.hpp"
+#include <opencv2/opencv.hpp>
 #include <caffe/caffe.hpp>
 #include <iostream>
 #include <string>
@@ -8,6 +8,7 @@
 #include <thread>
 #include <chrono>
 #include <functional>
+#include "global.hpp"
 #include "classifier.hpp"
 #include "progress_bar.hpp"
 
@@ -16,22 +17,6 @@ using namespace cv;
 
 int main(int argc, char *argv[])
 {
-    cout << "Hello" << endl;
-    CprogressBar a(string("Loading..."));
-    for (double i = 0; i <= 100; i += 1)
-    {
-        cout << a.update(
-            [=]() -> double {
-                return i / 100;
-            },
-            [&]() -> string {
-                stringstream ss;
-                ss << " ETA:" << 100 - i;
-                return ss.str();
-            });
-        this_thread::sleep_for(chrono::milliseconds(100));
-    }
-    return 1;
     ::google::InitGoogleLogging(argv[0]);
 
     std::string deploy_file{argv[1]};
