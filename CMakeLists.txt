@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.2)
 
 # Set libraries path
-set(OpenCV_DIR "/home/lorime/stephanxu/opencv/opencv-3.4.3/build")
+set(OpenCV_DIR "/home/lorime/stephanxu/opencv/opencv-3.4.3-cxx/build")
 set(Caffe_DIR "/home/lorime/liuyang/ssd-caffe/build")
 # set(Caffe_DIR "/home/lorime/caffe/build")
 # set(Caffe_INCLUDE_DIRS "/home/lorime/caffe/include")
@@ -38,5 +38,5 @@ aux_source_directory(
 
 add_executable(${PROJECT_NAME} ${DIR_SRC})
 
-target_link_libraries(${PROJECT_NAME} ${ZLIB_LIBRARIES} ${OpenCV_LIBS} ${Caffe_LIBRARIES} libtiff.so)
+target_link_libraries(${PROJECT_NAME} ${ZLIB_LIBRARIES} ${OpenCV_LIBS} ${Caffe_LIBRARIES} libtiff.so libuuid.so)
 

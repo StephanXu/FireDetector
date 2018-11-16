@@ -106,6 +106,7 @@ class CprogressBar
   private:
 	std::string _msg;
 
+	//generate a bar string
 	std::string generate_bar(double _value);
 
 	std::thread *_pthread;

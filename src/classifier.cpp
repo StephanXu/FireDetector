@@ -51,7 +51,7 @@ std::vector<float> Cclassifier::Classify(const cv::Mat &img)
         Mat channel(height, width, CV_32FC1, input_data);
         input_channels.push_back(channel);
         input_data += width * height;
-    } //这个for循环将网络的输入blob同input_channels关联起来
+    } //将网络的输入blob同input_channels关联起来
 
     // make a resized copy for data
     cv::Mat img_resized;
@@ -66,10 +66,11 @@ std::vector<float> Cclassifier::Classify(const cv::Mat &img)
 
     Mat sample_float;
     img_resized.convertTo(sample_float, CV_32FC3);
+
     Mat sample_normalized;
-    // cv::subtract(sample_float, Scalar(123.546283f, 112.177800f, 102.878753f), sample_normalized); //减去均值，均值可以自己求，也可以通过.binaryproto均值文件求出
+    // cv::subtract(sample_float, Scalar(123.546283f, 112.177800f, 102.878753f), sample_normalized);
     cv::subtract(sample_float, _mean, sample_normalized);
-    cv::split(sample_normalized, input_channels);                                                 //将输入图片放入input_channels，即放入了网络的输入blob
+    cv::split(sample_normalized, input_channels); // put image into input_channels(input to input blob)
 
     _net->Forward();
     Blob<float> *output_layer = _net->output_blobs()[0];
