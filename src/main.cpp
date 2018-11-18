@@ -9,56 +9,14 @@
 #include <chrono>
 #include <functional>
 #include <tuple>
+#include <deque>
 #include "global.hpp"
 #include "classifier.hpp"
 #include "progress_bar.hpp"
+#include "MotionAnalyser.hpp"
 
 using namespace std;
 using namespace cv;
-
-class CMotionAnalyser
-{
-  public:
-    vector<tuple<int, int, int, int>> _blocks;
-
-    int generate_blocks(tuple<int, int> size, int block_size);
-
-    int detect_motion_optical_flow_in_block(const cv::Mat &img_mat,
-                                            const cv::Mat &pre_img_mat,
-                                            const int block_size);
-};
-
-int CMotionAnalyser::generate_blocks(tuple<int, int> size, int block_size)
-{
-    for (int y{}; y < std::get<1>(size) - block_size; y += block_size)
-    {
-        for (int x{}; x < std::get<0>(size); x += block_size)
-        {
-            _blocks.push_back(make_tuple(x, y, block_size, block_size));
-        }
-    }
-    return 0;
-}
-
-int CMotionAnalyser::detect_motion_optical_flow_in_block(const cv::Mat &img_mat,
-                                                         const cv::Mat &pre_img_mat,
-                                                         const int block_size)
-{
-    Mat mgrey, mpre_grey;
-    /* Convert image to grey */
-    cvtColor(img_mat, mgrey, CV_BGR2GRAY);
-    cvtColor(pre_img_mat, mpre_grey, CV_BGR2GRAY);
-
-    
-    vector<Point2f> curt_points, prev_points;
-
-    goodFeaturesToTrack(mgrey, curt_points, 500, 0.001, 10);
-    // calcOpticalFlowPyrLK(pre_img_mat,img_mat,prev_points,curt_points,)
-    for (auto it{curt_points.begin()}; it != curt_points.end();it++)
-    {
-        circle(img_mat, *it, 2, Scalar(0, 0, 255));
-    }
-}
 
 int main(int argc, char *argv[])
 {
@@ -107,7 +65,7 @@ int main(int argc, char *argv[])
     }
 
     CMotionAnalyser ma;
-    
+
     // VideoWriter writer(outputFilename,
     //                    captSource.get(CAP_PROP_FOURCC),
     //                    captSource.get(CAP_PROP_FPS),
@@ -127,6 +85,9 @@ int main(int argc, char *argv[])
 
     CprogressBar pb("Calculating...");
     double start_time = cv::getTickCount();
+
+    ma.initialize_detect_object(16);
+    ma.generate_blocks(make_tuple(captSource.get(CAP_PROP_FRAME_WIDTH), captSource.get(CAP_PROP_FRAME_HEIGHT)), 24);
     for (;;)
     {
 
@@ -140,48 +101,62 @@ int main(int argc, char *argv[])
         if (frame.empty())
             break;
 
-        ma.detect_motion_optical_flow_in_block(frame, frame, 24);
+        Mat motion_map;
+        vector<tuple<int, int, int, int>> motion_blocks;
+        ma.feed_img(frame);
+        ma.detect_motion(motion_map);
+        if (count > 16)
+        {
+            ma.get_motion_blocks(ma._blocks, motion_map, motion_blocks);
+            for (auto it{motion_blocks.begin()}; it != motion_blocks.end(); it++)
+            {
+                int x{}, y{}, w{}, h{};
+                tie(x, y, w, h) = *it;
+                rectangle(frame, Rect(x, y, w, h), Scalar(0, 0, 255));
+            }
+        }
+        imshow("motion_map", motion_map);
+        
+        //vector<float> res = classifier.Classify(frame); //classify
 
-        // vector<float> res = classifier.Classify(frame); //classify
-       
         //output
         count++;
-/*
-        string current_status{};
-        Scalar text_color = Scalar(0, 0, 0);
-        if (res[0] >= res[1] && res[0] >= res[2])
-        {
-            current_status = "[fire]";
-            text_color = Scalar(0, 0, 255);
-        }
-        else if (res[1] >= res[0] && res[1] >= res[2])
-        {
-            current_status = "[normal]";
-            text_color = Scalar(0, 255, 0);
-        }
-        else if (res[2] >= res[0] && res[2] >= res[1])
-        {
-            current_status = "[smoke]";
-            text_color = Scalar(255, 0, 0);
-        }
 
-        // draw window
-        rectangle(frame, Rect(20, 10, 300, 160), text_color, 1);
-        stringstream ss;
-        ss << "Frame:" << count << "/" << frameCount;
-        putText(frame, ss.str(), Point(30, 30), cv::FONT_HERSHEY_COMPLEX_SMALL, 1, text_color);
-        ss.str("");
-        putText(frame, current_status, Point(30, 60), cv::FONT_HERSHEY_COMPLEX_SMALL, 1, text_color);
-        ss << "Fire:" << res[0];
-        putText(frame, ss.str(), Point(30, 90), cv::FONT_HERSHEY_COMPLEX_SMALL, 1, text_color);
-        ss.str("");
-        ss << "Normal:" << res[1];
-        putText(frame, ss.str(), Point(30, 120), cv::FONT_HERSHEY_COMPLEX_SMALL, 1, text_color);
-        ss.str("");
-        ss << "Smoke:" << res[2];
-        putText(frame, ss.str(), Point(30, 150), cv::FONT_HERSHEY_COMPLEX_SMALL, 1, text_color);
-        ss.str("");
-*/
+        // string current_status{};
+        // Scalar text_color = Scalar(0, 0, 0);
+        // if (res[0] >= res[1] && res[0] >= res[2])
+        // {
+        //     current_status = "[fire]";
+        //     text_color = Scalar(0, 0, 255);
+        // }
+        // else if (res[1] >= res[0] && res[1] >= res[2])
+        // {
+        //     current_status = "[normal]";
+        //     text_color = Scalar(0, 255, 0);
+        // }
+        // else if (res[2] >= res[0] && res[2] >= res[1])
+        // {
+        //     current_status = "[smoke]";
+        //     text_color = Scalar(255, 0, 0);
+        // }
+
+        // // draw window
+        // rectangle(frame, Rect(20, 10, 300, 160), text_color, 1);
+        // stringstream ss;
+        // ss << "Frame:" << count << "/" << frameCount;
+        // putText(frame, ss.str(), Point(30, 30), cv::FONT_HERSHEY_COMPLEX_SMALL, 1, text_color);
+        // ss.str("");
+        // putText(frame, current_status, Point(30, 60), cv::FONT_HERSHEY_COMPLEX_SMALL, 1, text_color);
+        // ss << "Fire:" << res[0];
+        // putText(frame, ss.str(), Point(30, 90), cv::FONT_HERSHEY_COMPLEX_SMALL, 1, text_color);
+        // ss.str("");
+        // ss << "Normal:" << res[1];
+        // putText(frame, ss.str(), Point(30, 120), cv::FONT_HERSHEY_COMPLEX_SMALL, 1, text_color);
+        // ss.str("");
+        // ss << "Smoke:" << res[2];
+        // putText(frame, ss.str(), Point(30, 150), cv::FONT_HERSHEY_COMPLEX_SMALL, 1, text_color);
+        // ss.str("");
+
         if (bVision)
         {
             imshow("FireDetector", frame);
