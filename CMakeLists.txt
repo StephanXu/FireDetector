@@ -2,12 +2,16 @@ cmake_minimum_required(VERSION 3.2)
 
 # Set libraries path
 set(OpenCV_DIR "/home/lorime/stephanxu/opencv/opencv-3.4.3-cxx/build")
-set(Caffe_DIR "/home/lorime/liuyang/ssd-caffe/build")
-# set(Caffe_DIR "/home/lorime/caffe/build")
-# set(Caffe_INCLUDE_DIRS "/home/lorime/caffe/include")
+# set(Caffe_DIR "/home/lorime/liuyang/ssd-caffe/build")
+set(Caffe_DIR "/home/lorime/caffe/build")
+set(Caffe_INCLUDE_DIRS "/home/lorime/caffe/include")
 
 # set project name
 project(FireDetector)
+
+SET(CMAKE_BUILD_TYPE "Debug")
+SET(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -Wall -g2 -ggdb") 
+SET(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -Wall")
 
 # test CXX11 support
 add_definitions("-std=c++11")
@@ -29,7 +33,7 @@ find_package(OpenCV REQUIRED)
 find_package(Caffe REQUIRED)
 
 include_directories(
-    ${CMAKE_CURRENT_SOURCE_DIR}/include ${OpenCV_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIRS} ${Caffe_INCLUDE_DIRS} #/home/lorime/caffe/build/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/include ${OpenCV_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIRS} ${Caffe_INCLUDE_DIRS} /home/lorime/caffe/build/include
 )
 
 aux_source_directory(

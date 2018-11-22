@@ -68,7 +68,7 @@ std::vector<float> Cclassifier::Classify(const cv::Mat &img)
     img_resized.convertTo(sample_float, CV_32FC3);
 
     Mat sample_normalized;
-    // cv::subtract(sample_float, Scalar(123.546283f, 112.177800f, 102.878753f), sample_normalized);
+    // cv::subtract(sample_float, Scalar(103.939f, 116.779f, 123.68f), sample_normalized);
     cv::subtract(sample_float, _mean, sample_normalized);
     cv::split(sample_normalized, input_channels); // put image into input_channels(input to input blob)
 

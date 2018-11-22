@@ -14,7 +14,7 @@
 #include "classifier.hpp"
 #include "progress_bar.hpp"
 #include "MotionAnalyser.hpp"
-
+#include "cmdline.h"
 using namespace std;
 using namespace cv;
 
@@ -22,75 +22,55 @@ int main(int argc, char *argv[])
 {
     ::google::InitGoogleLogging(argv[0]);
 
-    std::string deploy_file{argv[1]};
-    std::string caffemodel_file{argv[2]};
-    std::string mean_file{argv[3]};
-    std::string videoFilename{argv[4]};
-    std::string outputFilename{argv[6]};
-    std::string strVision{argv[7]};
-    std::string strImageSeq{argv[8]};
-    std::string ImageSeq_path{argv[9]};
-
-    bool bVision{false};
-    if (strVision == "yes")
-        bVision = true;
-    else
-        bVision = false;
-
-    bool bImageSeq{false};
-    if (strImageSeq == "yes")
-        bImageSeq = true;
-    else
-        bImageSeq = false;
-
-    cout << "deploy_file:\t" << deploy_file << endl;
-    cout << "caffemodel:\t" << caffemodel_file << endl;
+    // Parse params
+    global.parse_params(argc, argv);
+    cout << "deploy_file:\t" << global.m_deploy_file << endl;
+    cout << "caffemodel:\t" << global.m_model_file << endl;
     cout << "=======Process video=======" << endl;
 
+    // Init network
     std::vector<std::string> labels{"fire", "normal", "smoke"};
-    Cclassifier classifier(deploy_file, caffemodel_file, labels);
+    Cclassifier classifier(global.m_deploy_file, global.m_model_file, labels);
+    classifier.SetMean(global.m_mean_file);
 
-    classifier.SetMean(mean_file);
-
-    int delayBtFrame{0};
-    stringstream ss;
-    ss << argv[5];
-    ss >> delayBtFrame;
-
-    VideoCapture captSource(videoFilename);
+    // Init video reader
+    VideoCapture captSource(global.m_video_file);
     if (!captSource.isOpened())
     {
         cout << "[Error!]: Open video failed";
         return 0;
     }
 
+    // Init video writer
+    VideoWriter writer;
+    if (global.m_save_result)
+    {
+        writer.open(global.m_output_video,
+                    captSource.get(CAP_PROP_FOURCC),
+                    captSource.get(CAP_PROP_FPS),
+                    Size(captSource.get(CAP_PROP_FRAME_WIDTH), captSource.get(CAP_PROP_FRAME_HEIGHT)));
+        if (!writer.isOpened())
+        {
+            cout << "[Error!]: Create output video file failed" << endl;
+            return 0;
+        }
+    }
+
+    // Init preview window
+    if (global.m_previous_wnd)
+        namedWindow("FireDetector", WINDOW_AUTOSIZE);
+
     CMotionAnalyser ma;
 
-    // VideoWriter writer(outputFilename,
-    //                    captSource.get(CAP_PROP_FOURCC),
-    //                    captSource.get(CAP_PROP_FPS),
-    //                    Size(captSource.get(CAP_PROP_FRAME_WIDTH), captSource.get(CAP_PROP_FRAME_HEIGHT)));
-    // if (!writer.isOpened())
-    // {
-    //     cout << "[Error!]: Create output video file failed" << endl;
-    //     return 0;
-    // }
-
-    int laststatus{-1};
-    if (bVision)
-        namedWindow("FireDetector", WINDOW_AUTOSIZE);
-    // vector<vector<float>> result;
     int count{};
     const double frameCount{captSource.get(CAP_PROP_FRAME_COUNT)};
-
     CprogressBar pb("Calculating...");
     double start_time = cv::getTickCount();
-
-    ma.initialize_detect_object(16);
+    ma.initialize_detect_object(32);
     ma.generate_blocks(make_tuple(captSource.get(CAP_PROP_FRAME_WIDTH), captSource.get(CAP_PROP_FRAME_HEIGHT)), 24);
+
     for (;;)
     {
-
         cout << flush << pb.update([&]() -> double { return count / frameCount; }, [&]() -> string { 
             stringstream ss;
             ss<<" FRAME:"<<count<<"/"<<frameCount;
@@ -101,76 +81,84 @@ int main(int argc, char *argv[])
         if (frame.empty())
             break;
 
-        Mat motion_map;
-        vector<tuple<int, int, int, int>> motion_blocks;
-        ma.feed_img(frame);
-        ma.detect_motion(motion_map);
-        if (count > 16)
-        {
-            ma.get_motion_blocks(ma._blocks, motion_map, motion_blocks);
-            for (auto it{motion_blocks.begin()}; it != motion_blocks.end(); it++)
-            {
-                int x{}, y{}, w{}, h{};
-                tie(x, y, w, h) = *it;
-                rectangle(frame, Rect(x, y, w, h), Scalar(0, 0, 255));
-            }
-        }
-        imshow("motion_map", motion_map);
-        
-        //vector<float> res = classifier.Classify(frame); //classify
+        vector<float> res = classifier.Classify(frame); //classify
+
+        // Mat motion_map;
+        // vector<tuple<int, int, int, int>> motion_blocks;
+        // ma.feed_img(frame);
+        // ma.detect_motion(motion_map);
+        // if (count > 32)
+        // {
+        //     ma.get_motion_blocks(ma._blocks, motion_map, motion_blocks);
+        //     for (auto it{motion_blocks.begin()}; it != motion_blocks.end(); it++)
+        //     {
+        //         int x{}, y{}, w{}, h{};
+        //         tie(x, y, w, h) = *it;
+        //         Mat block = frame(Rect(x, y, w, h));
+        //         vector<float> block_res = classifier.Classify(block);
+        //         Scalar block_color = Scalar(0, 0, 0);
+        //         if (block_res[0] >= block_res[1] && block_res[0] >= block_res[2])
+        //         {
+        //             block_color = Scalar(0, 0, 255);
+        //         }
+        //         else if (block_res[1] >= block_res[0] && block_res[1] >= block_res[2])
+        //         {
+        //             block_color = Scalar(0, 255, 0);
+        //         }
+        //         else if (block_res[2] >= block_res[0] && block_res[2] >= block_res[1])
+        //         {
+        //             block_color = Scalar(255, 0, 0);
+        //         }
+        //         rectangle(frame, Rect(x, y, w, h), block_color);
+        //     }
+        // }
 
         //output
         count++;
 
-        // string current_status{};
-        // Scalar text_color = Scalar(0, 0, 0);
-        // if (res[0] >= res[1] && res[0] >= res[2])
-        // {
-        //     current_status = "[fire]";
-        //     text_color = Scalar(0, 0, 255);
-        // }
-        // else if (res[1] >= res[0] && res[1] >= res[2])
-        // {
-        //     current_status = "[normal]";
-        //     text_color = Scalar(0, 255, 0);
-        // }
-        // else if (res[2] >= res[0] && res[2] >= res[1])
-        // {
-        //     current_status = "[smoke]";
-        //     text_color = Scalar(255, 0, 0);
-        // }
+        string current_status{};
+        Scalar text_color = Scalar(0, 0, 0);
+        if (res[0] >= res[1] && res[0] >= res[2])
+        {
+            current_status = "[fire]";
+            text_color = Scalar(0, 0, 255);
+        }
+        else if (res[1] >= res[0] && res[1] >= res[2])
+        {
+            current_status = "[normal]";
+            text_color = Scalar(0, 255, 0);
+        }
+        else if (res[2] >= res[0] && res[2] >= res[1])
+        {
+            current_status = "[smoke]";
+            text_color = Scalar(255, 0, 0);
+        }
 
-        // // draw window
-        // rectangle(frame, Rect(20, 10, 300, 160), text_color, 1);
-        // stringstream ss;
-        // ss << "Frame:" << count << "/" << frameCount;
-        // putText(frame, ss.str(), Point(30, 30), cv::FONT_HERSHEY_COMPLEX_SMALL, 1, text_color);
-        // ss.str("");
-        // putText(frame, current_status, Point(30, 60), cv::FONT_HERSHEY_COMPLEX_SMALL, 1, text_color);
-        // ss << "Fire:" << res[0];
-        // putText(frame, ss.str(), Point(30, 90), cv::FONT_HERSHEY_COMPLEX_SMALL, 1, text_color);
-        // ss.str("");
-        // ss << "Normal:" << res[1];
-        // putText(frame, ss.str(), Point(30, 120), cv::FONT_HERSHEY_COMPLEX_SMALL, 1, text_color);
-        // ss.str("");
-        // ss << "Smoke:" << res[2];
-        // putText(frame, ss.str(), Point(30, 150), cv::FONT_HERSHEY_COMPLEX_SMALL, 1, text_color);
-        // ss.str("");
+        // draw window
+        rectangle(frame, Rect(20, 10, 300, 160), text_color, 1);
+        stringstream ss;
+        ss << "Frame:" << count << "/" << frameCount;
+        putText(frame, ss.str(), Point(30, 30), cv::FONT_HERSHEY_COMPLEX_SMALL, 1, text_color);
+        ss.str("");
+        putText(frame, current_status, Point(30, 60), cv::FONT_HERSHEY_COMPLEX_SMALL, 1, text_color);
+        ss << "Fire:" << res[0];
+        putText(frame, ss.str(), Point(30, 90), cv::FONT_HERSHEY_COMPLEX_SMALL, 1, text_color);
+        ss.str("");
+        ss << "Normal:" << res[1];
+        putText(frame, ss.str(), Point(30, 120), cv::FONT_HERSHEY_COMPLEX_SMALL, 1, text_color);
+        ss.str("");
+        ss << "Smoke:" << res[2];
+        putText(frame, ss.str(), Point(30, 150), cv::FONT_HERSHEY_COMPLEX_SMALL, 1, text_color);
+        ss.str("");
 
-        if (bVision)
+        if (global.m_previous_wnd)
         {
             imshow("FireDetector", frame);
-            waitKey(delayBtFrame);
+            waitKey(1);
         }
         // output file
-        // if (!bImageSeq)
-        //     writer << frame;
-        // else
-        // {
-        //     stringstream oss;
-        //     oss << ImageSeq_path << count << ".jpg";
-        //     imwrite(oss.str(), frame);
-        // }
+        if (global.m_save_result)
+            writer << frame;
     }
 
     cout << flush << pb.update([&]() -> double { return 1; }, [&]() -> string { 
@@ -180,7 +168,7 @@ int main(int argc, char *argv[])
 
     cout << endl
          << "Process Over" << endl;
-    cout << "Result:" << outputFilename << endl;
+    cout << "Result:" << global.m_output_video << endl;
     double end_time = getTickCount();
     cout << "Cost time:" << (end_time - start_time) * 1000 / (getTickFrequency())
          << "ms" << endl;

@@ -13,17 +13,18 @@ class Cglobal
   public:
     explicit Cglobal();
 
-    void parse_command(int argc, char *argv[]);
+    int parse_params(int argc, char *argv[]);
 
     /* Configurations */
-    string deploy_file;
-    string model_file;
-    string mean_file;
-    string video_file;
-
-    vector<pair<string, string>> _parse_list;
-    // vector<pair<
-    bool bPreviousWnd;
+    string m_deploy_file;
+    string m_model_file;
+    string m_mean_file;
+    string m_video_file;
+    bool m_save_result;
+    string m_output_video;
+    bool m_previous_wnd;
 };
+
+extern Cglobal global;
 
 #endif

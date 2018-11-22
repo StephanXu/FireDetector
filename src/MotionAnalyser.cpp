@@ -14,7 +14,7 @@ int CMotionAnalyser::generate_blocks(tuple<int, int> size, int block_size)
 {
     for (int y{}; y < std::get<1>(size) - block_size; y += block_size)
     {
-        for (int x{}; x < std::get<0>(size); x += block_size)
+        for (int x{}; x < std::get<0>(size)-block_size; x += block_size)
         {
             _blocks.push_back(make_tuple(x, y, block_size, block_size));
         }
@@ -52,7 +52,6 @@ int CMotionAnalyser::get_motion_blocks(vector<tuple<int, int, int, int>> &blockL
     float t11{}, t12{}, t21{}, t22{};
     int x{}, y{}, w{}, h{};
     integral(motion_map, int_diff);
-    imshow("integral", int_diff);
     for (auto it{blockList.begin()}; it != blockList.end(); it++)
     {
         tie(x, y, w, h) = *it;
