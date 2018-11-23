@@ -27,7 +27,7 @@ int CMotionAnalyser::initialize_detect_object(const int frame_sample_count,
                                               const bool detectShadows)
 {
     /* [ATTENTION] please add some control.*/
-    _bgsubtrator = createBackgroundSubtractorKNN(_frame_sample_count, 400, true);
+    _bgsubtrator = createBackgroundSubtractorKNN(_frame_sample_count, 800, false);
 }
 
 int CMotionAnalyser::detect_motion(Mat &output)

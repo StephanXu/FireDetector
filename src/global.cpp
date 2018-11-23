@@ -14,7 +14,9 @@ Cglobal::Cglobal()
       m_video_file(""),
       m_save_result(false),
       m_output_video(""),
-      m_previous_wnd(false)
+      m_previous_wnd(false),
+      m_sample_capacity(8),
+      m_block_size(48)
 {
     ;
 }
@@ -22,6 +24,7 @@ Cglobal::Cglobal()
 int Cglobal::parse_params(int argc, char *argv[])
 {
     cmdline::parser argv_parser;
+    /* Basic configurations */
     argv_parser.add<string>("deploy", 'd', "The deploy file of model.", false, "../example/example_deploy.prototxt");
     argv_parser.add<string>("model", 'm', "The '.caffemodel' file of model.", false, "../example/example_model.caffemodel");
     argv_parser.add<string>("mean", '\0', "Mean file", false, "../example/example_mean.binaryproto");
@@ -30,36 +33,21 @@ int Cglobal::parse_params(int argc, char *argv[])
     argv_parser.add<string>("output", 'o', "Path to save the video processed.(need 'save' to be enabled)", false, "");
     argv_parser.add("view", '\0', "Show the process while processing video.");
 
+    /* Advance configurations */
+    argv_parser.add<int>("sample", 's', "Capacity of sample frames for motion detecting.", false, 8, cmdline::range(2, 100));
+    argv_parser.add<int>("block_size", 'b', "Size of motion blocks.", false, 48, cmdline::range(24, 1000));
+
     argv_parser.parse_check(argc, argv);
 
-    global.m_deploy_file = argv_parser.get<string>("deploy");
-    global.m_model_file = argv_parser.get<string>("model");
-    global.m_mean_file = argv_parser.get<string>("mean");
-    global.m_video_file = argv_parser.get<string>("video");
-    global.m_save_result = argv_parser.exist("save");
-    global.m_output_video = argv_parser.get<string>("output");
-    global.m_previous_wnd = argv_parser.exist("view");
+    m_deploy_file = argv_parser.get<string>("deploy");
+    m_model_file = argv_parser.get<string>("model");
+    m_mean_file = argv_parser.get<string>("mean");
+    m_video_file = argv_parser.get<string>("video");
+    m_save_result = argv_parser.exist("save");
+    m_output_video = argv_parser.get<string>("output");
+    m_previous_wnd = argv_parser.exist("view");
+
+    m_sample_capacity = argv_parser.get<int>("sample");
+    m_block_size = argv_parser.get<int>("block_size");
     return 1;
 }
-
-// void Cglobal::parse_command(int argc, char *argv[])
-// {
-//     for (int i{1}; i < argc; ++i)
-//     {
-//         string cmd(argv[i]);
-//         for each (auto item in _parse_list)
-//         {
-//             if (item.first==cmd)
-//             {
-//                 if (item.second)
-//                 {
-//                     if (++i>=argc)
-//                     {
-//                         throw "argument parse fail";
-//                     }
-
-//                 }
-//             }
-//         }
-//     }
-// }

@@ -110,3 +110,9 @@ void Cclassifier::SetMean(const std::string &mean_file)
     cv::Scalar channel_mean = cv::mean(mean);
     _mean = cv::Mat(_input_geometry, mean.type(), channel_mean);
 }
+
+std::tuple<int, float> Cclassifier::GetResult(const std::vector<float> &classify_result)
+{
+    auto max_item = max_element(classify_result.begin(), classify_result.end());
+    return make_tuple(max_item - classify_result.begin(), *max_item);
+}

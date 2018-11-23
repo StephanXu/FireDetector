@@ -23,6 +23,8 @@ class Cclassifier
 
     void SetMean(const std::string &mean_file);
 
+    std::tuple<int, float> GetResult(const std::vector<float> &classify_result);
+
   private:
     // network
     std::shared_ptr<caffe::Net<float>> _net;

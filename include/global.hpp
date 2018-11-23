@@ -15,7 +15,7 @@ class Cglobal
 
     int parse_params(int argc, char *argv[]);
 
-    /* Configurations */
+    /* Basic Configurations */
     string m_deploy_file;
     string m_model_file;
     string m_mean_file;
@@ -23,6 +23,10 @@ class Cglobal
     bool m_save_result;
     string m_output_video;
     bool m_previous_wnd;
+
+    /* Advance Configurations */
+    int m_sample_capacity;
+    int m_block_size;
 };
 
 extern Cglobal global;
