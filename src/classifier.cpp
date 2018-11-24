@@ -6,6 +6,7 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+#include "global.hpp"
 
 using namespace caffe;
 using namespace cv;
@@ -64,13 +65,16 @@ std::vector<float> Cclassifier::Classify(const cv::Mat &img)
     img_resized.convertTo(sample_float, CV_32FC3);
 
     Mat sample_normalized;
-    // cv::subtract(sample_float, Scalar(103.939f, 116.779f, 123.68f), sample_normalized);
-    cv::subtract(sample_float, _mean, sample_normalized);
+    if (global.m_custom_mean)
+        cv::subtract(sample_float, _mean, sample_normalized);
+    else
+        cv::subtract(sample_float, global.c_mean_value, sample_normalized);
+
     cv::split(sample_normalized, input_channels); // put image into input_channels(input to input blob)
 
     _net->Forward();
     Blob<float> *output_layer = _net->output_blobs()[0];
-    const float *begin = output_layer->cpu_data(); //[ATTENTION] WHY???
+    const float *begin = output_layer->cpu_data();
     const float *end = begin + output_layer->channels();
 
     return std::vector<float>(begin, end);

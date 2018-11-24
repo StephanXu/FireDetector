@@ -10,6 +10,7 @@ Cglobal global;
 Cglobal::Cglobal()
     : m_deploy_file(""),
       m_model_file(""),
+      m_custom_mean(false),
       m_mean_file(""),
       m_video_file(""),
       m_save_result(false),
@@ -30,6 +31,7 @@ int Cglobal::parse_params(int argc, char *argv[])
     /* Basic configurations */
     argv_parser.add<string>("deploy", 'd', "The deploy file of model.", false, "../example/example_deploy.prototxt");
     argv_parser.add<string>("model", 'm', "The '.caffemodel' file of model.", false, "../example/example_model.caffemodel");
+    argv_parser.add("cmean", '\0', "Use customed mean file");
     argv_parser.add<string>("mean", '\0', "Mean file", false, "../example/example_mean.binaryproto");
     argv_parser.add<string>("video", 'v', "The video to be detect.", true, "../example_testvideo.mp4");
     argv_parser.add("save", '\0', "Save the results.");
@@ -47,6 +49,7 @@ int Cglobal::parse_params(int argc, char *argv[])
 
     m_deploy_file = argv_parser.get<string>("deploy");
     m_model_file = argv_parser.get<string>("model");
+    m_custom_mean = argv_parser.exist("cmean");
     m_mean_file = argv_parser.get<string>("mean");
     m_video_file = argv_parser.get<string>("video");
     m_save_result = argv_parser.exist("save");

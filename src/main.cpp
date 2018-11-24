@@ -32,7 +32,8 @@ int main(int argc, char *argv[])
   // Init network
   std::vector<std::string> labels{"fire", "normal", "smoke"};
   Cclassifier classifier(global.m_deploy_file, global.m_model_file);
-  classifier.SetMean(global.m_mean_file);
+  if (global.m_custom_mean)
+    classifier.SetMean(global.m_mean_file);
 
   CAsyncAnalyseTaskControl async_classifier;
   if (global.m_enable_multithread)

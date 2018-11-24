@@ -19,10 +19,12 @@ class Cglobal
     /* Constant */
     const float c_mask_alpha{0.5};
     const vector<cv::Scalar> c_mask_colors{cv::Scalar(0x00, 0x2c, 0xdd), cv::Scalar(0x50, 0xaf, 0x4c), cv::Scalar(0xb5, 0x51, 0x3f)};
-
+    const cv::Scalar c_mean_value{cv::Scalar(103.939, 116.779, 123.68)};
+    
     /* Basic Configurations */
     string m_deploy_file;
     string m_model_file;
+    bool m_custom_mean;
     string m_mean_file;
     string m_video_file;
     bool m_save_result;
