@@ -30,7 +30,7 @@ class CMotionAnalyser
                         (This parameter does not affect background updates.)
         detectShadows: Set this param 'true' to detect shadows. (It costs much time)
     */
-    int initialize_detect_object(const int frame_sample_count,
+    void initialize_detect_object(const int frame_sample_count,
                                  const double Dist2Threshold = 400.0,
                                  const bool detectShadows = false);
     /*

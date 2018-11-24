@@ -16,8 +16,7 @@ class Cclassifier
   Cclassifier:
   */
     explicit Cclassifier(const std::string &deploy_file,
-                         const std::string &caffemodel,
-                         const std::vector<std::string> &labels);
+                         const std::string &caffemodel);
 
     std::vector<float> Classify(const cv::Mat &img);
 
@@ -32,8 +31,6 @@ class Cclassifier
     cv::Size _input_geometry;
     // num of channels
     int _num_channels;
-    // all labels
-    std::vector<std::string> _labels;
 
     cv::Mat _mean;
 };

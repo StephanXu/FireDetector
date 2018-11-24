@@ -15,6 +15,9 @@ Cglobal::Cglobal()
       m_save_result(false),
       m_output_video(""),
       m_previous_wnd(false),
+      m_multithread_num(1),
+      m_enable_multithread(false),
+      m_disable_motion_block(false),
       m_sample_capacity(8),
       m_block_size(48)
 {
@@ -32,6 +35,9 @@ int Cglobal::parse_params(int argc, char *argv[])
     argv_parser.add("save", '\0', "Save the results.");
     argv_parser.add<string>("output", 'o', "Path to save the video processed.(need 'save' to be enabled)", false, "");
     argv_parser.add("view", '\0', "Show the process while processing video.");
+    argv_parser.add("parallel", 'p', "Parallel processing.");
+    argv_parser.add<int>("multi", 't', "The number of multithread", false, 1, cmdline::range(1, 100));
+    argv_parser.add("no_MB", '\0', "Disable the motion blocks");
 
     /* Advance configurations */
     argv_parser.add<int>("sample", 's', "Capacity of sample frames for motion detecting.", false, 8, cmdline::range(2, 100));
@@ -46,6 +52,9 @@ int Cglobal::parse_params(int argc, char *argv[])
     m_save_result = argv_parser.exist("save");
     m_output_video = argv_parser.get<string>("output");
     m_previous_wnd = argv_parser.exist("view");
+    m_enable_multithread = argv_parser.exist("parallel");
+    m_multithread_num = argv_parser.get<int>("multi");
+    m_disable_motion_block = argv_parser.exist("no_MB");
 
     m_sample_capacity = argv_parser.get<int>("sample");
     m_block_size = argv_parser.get<int>("block_size");

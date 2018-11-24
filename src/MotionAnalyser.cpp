@@ -30,7 +30,7 @@ int CMotionAnalyser::generate_blocks(tuple<int, int> size, int block_size)
     return 0;
 }
 
-int CMotionAnalyser::initialize_detect_object(const int frame_sample_count,
+void CMotionAnalyser::initialize_detect_object(const int frame_sample_count,
                                               const double Dist2Threshold,
                                               const bool detectShadows)
 {
@@ -83,7 +83,7 @@ int CMotionAnalyser::feed_img(const Mat &img, const bool auto_apply)
     }
 
     _frameList.push_back(img);
-    if (_frameList.size() > _frame_sample_count)
+    if (_frameList.size() > static_cast<size_t>(_frame_sample_count))
     {
         _frameList.pop_front();
     }

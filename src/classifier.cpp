@@ -12,8 +12,7 @@ using namespace cv;
 using namespace std;
 
 Cclassifier::Cclassifier(const std::string &deploy_file,
-                         const std::string &caffemodel,
-                         const std::vector<string> &labels)
+                         const std::string &caffemodel)
 {
     // set basic settings
     Caffe::set_mode(Caffe::GPU);
@@ -26,9 +25,6 @@ Cclassifier::Cclassifier(const std::string &deploy_file,
     Blob<float> *input_layer = _net->input_blobs()[0];
     _input_geometry = cv::Size(input_layer->width(), input_layer->height());
     _num_channels = input_layer->channels();
-
-    // load labels
-    _labels.assign(labels.begin(), labels.end());
 
     // [ATTENTION]here needS more checking...
 

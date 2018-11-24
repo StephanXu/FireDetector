@@ -28,6 +28,9 @@ class Cglobal
     bool m_save_result;
     string m_output_video;
     bool m_previous_wnd;
+    int m_multithread_num;
+    bool m_enable_multithread;
+    bool m_disable_motion_block;
 
     /* Advance Configurations */
     int m_sample_capacity;
