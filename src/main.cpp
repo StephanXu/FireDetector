@@ -81,6 +81,10 @@ int main(int argc, char *argv[])
         if (frame.empty())
             break;
 
+        /* Create a mask for drawing */
+        cv::Mat mask;
+        frame.copyTo(mask);
+
         vector<float> res = classifier.Classify(frame); //classify
         string current_status{};
         int current_status_index;
@@ -98,33 +102,17 @@ int main(int argc, char *argv[])
             {
                 int x{}, y{}, w{}, h{};
                 tie(x, y, w, h) = *it;
-                x++;
-                y++;
-                w--;
-                h--;
+                // x++;
+                // y++;
+                // w--;
+                // h--;
                 Mat block = frame(Rect(x, y, w, h));
                 vector<float> block_res = classifier.Classify(block);
                 int current_block_status_index;
                 current_block_status_index = std::get<0>(classifier.GetResult(block_res));
                 if (current_block_status_index != 1 && current_block_status_index == current_status_index)
                 {
-                    Scalar block_color = Scalar(0, 0, 0);
-                    switch (current_block_status_index)
-                    {
-                    case 0:
-                        block_color = Scalar(0, 0, 255);
-                        break;
-                    case 1:
-                        block_color = Scalar(0, 255, 0);
-                        break;
-                    case 2:
-                        block_color = Scalar(255, 0, 0);
-                        break;
-                    default:
-                        break;
-                    }
-                    // circle(frame, Point(x, y), global.m_block_size/2, block_color, 1);
-                    rectangle(frame, Rect(x, y, w, h), block_color, 1);
+                    rectangle(mask, Rect(x, y, w, h), global.c_mask_colors[current_block_status_index], CV_FILLED);
                 }
             }
         }
@@ -132,38 +120,24 @@ int main(int argc, char *argv[])
         //output
         count++;
 
-        Scalar text_color = Scalar(0, 0, 0);
-        switch (current_status_index)
-        {
-        case 0:
-            text_color = Scalar(0, 0, 255);
-            break;
-        case 1:
-            text_color = Scalar(0, 255, 0);
-            break;
-        case 2:
-            text_color = Scalar(255, 0, 0);
-            break;
-        default:
-            break;
-        }
-
         // draw window
-        rectangle(frame, Rect(20, 10, 300, 160), text_color, 1);
+        rectangle(frame, Rect(20, 10, 300, 155), global.c_mask_colors[current_status_index], 1);
         stringstream ss;
         ss << "Frame:" << count << "/" << frameCount;
-        putText(frame, ss.str(), Point(30, 30), cv::FONT_HERSHEY_COMPLEX_SMALL, 1, text_color);
+        putText(frame, ss.str(), Point(30, 30), cv::FONT_HERSHEY_COMPLEX_SMALL, 1, global.c_mask_colors[current_status_index]);
         ss.str("");
-        putText(frame, current_status, Point(30, 60), cv::FONT_HERSHEY_COMPLEX_SMALL, 1, text_color);
+        putText(frame, current_status, Point(30, 60), cv::FONT_HERSHEY_COMPLEX_SMALL, 1, global.c_mask_colors[current_status_index]);
         ss << "Fire:" << res[0];
-        putText(frame, ss.str(), Point(30, 90), cv::FONT_HERSHEY_COMPLEX_SMALL, 1, text_color);
+        putText(frame, ss.str(), Point(30, 90), cv::FONT_HERSHEY_COMPLEX_SMALL, 1, global.c_mask_colors[current_status_index]);
         ss.str("");
         ss << "Normal:" << res[1];
-        putText(frame, ss.str(), Point(30, 120), cv::FONT_HERSHEY_COMPLEX_SMALL, 1, text_color);
+        putText(frame, ss.str(), Point(30, 120), cv::FONT_HERSHEY_COMPLEX_SMALL, 1, global.c_mask_colors[current_status_index]);
         ss.str("");
         ss << "Smoke:" << res[2];
-        putText(frame, ss.str(), Point(30, 150), cv::FONT_HERSHEY_COMPLEX_SMALL, 1, text_color);
+        putText(frame, ss.str(), Point(30, 150), cv::FONT_HERSHEY_COMPLEX_SMALL, 1, global.c_mask_colors[current_status_index]);
         ss.str("");
+
+        cv::addWeighted(mask, global.c_mask_alpha, frame, 1.0 - global.c_mask_alpha, 0, frame);
 
         if (global.m_previous_wnd)
         {

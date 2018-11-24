@@ -7,16 +7,24 @@
 using namespace std;
 using namespace cv;
 
-
 /* Definition: CMotionAnalyser */
 
 int CMotionAnalyser::generate_blocks(tuple<int, int> size, int block_size)
 {
     for (int y{}; y < std::get<1>(size) - block_size; y += block_size)
     {
-        for (int x{}; x < std::get<0>(size)-block_size; x += block_size)
+        for (int x{}; x < std::get<0>(size) - block_size; x += block_size)
         {
-            _blocks.push_back(make_tuple(x, y, block_size, block_size));
+            int w{block_size}, h{block_size};
+            if (x + block_size > get<0>(size))
+            {
+                w = get<0>(size) - x;
+            }
+            if (y+block_size>get<1>(size))
+            {
+                h = get<1>(size) - y;
+            }
+            _blocks.push_back(make_tuple(x, y, w, h));
         }
     }
     return 0;
@@ -92,13 +100,12 @@ int CMotionAnalyser::apply_img()
         return 0;
     }
 
-    for (auto it{_frameList.begin()}; it != _frameList.end();it++)
+    for (auto it{_frameList.begin()}; it != _frameList.end(); it++)
     {
         _bgsubtrator->apply(*it, _bgMask);
     }
     return 1;
 }
-
 
 /* Definition: CMotionAnalyserOpticalFlow */
 
