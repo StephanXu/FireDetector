@@ -3,25 +3,28 @@
 
 <head>
     <meta charset='UTF-8'>
-    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
-    <link href="https://cdn.bootcss.com/twitter-bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.bootcss.com/twitter-bootstrap/4.1.3/js/bootstrap.min.js"></script>
-
+    <!-- <script src="https://cdn.jsdelivr.net/npm/vue"></script> -->
+    <script src=".\js\vue_product.js"></script>
+    <!-- <link href="https://cdn.bootcss.com/twitter-bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet"> -->
+    <link href=".\js\bootstrap.min.css" rel="stylesheet">
+    <!-- <script src="https://cdn.bootcss.com/twitter-bootstrap/4.1.3/js/bootstrap.min.js"></script> -->
+    <script src=".\js\bootstrap.min.js"></script>
+    
     <style type='text/css'>
         .menu_text {
             color: #fff;
-            font-size: 1.2em;
-            padding: 20px;
+            font-size: 1em;
+            padding: 60px;
             transition: all 0.5s ease-in-out 0s;
         }
 
-        .menu_text_active{
+        .menu_text_active {
             color: #66bbff;
             transition: all 0.5s ease-in-out 0s;
         }
 
         .menu_text:hover {
-            color: #66bbff;
+            color: #adadad;
             transition: all 0.5s ease-in-out 0s;
         }
 
@@ -45,14 +48,21 @@
     </style>
 </head>
 
-<body>
+<body style="background: #06070b">
     <div id="app">
         <div class="row">
-            <div class="col-md-12" style="height: 70px;background: #141414;">
-                <div id="menu" class="container-fluid" style="margin-top:17px;">
+            <div class="col-md-12" style="height: 30px;background: #444444;">
+
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12" style="height: 45px;background: #181818;">
+                <div id="menu" class="container-fluid" style="margin-top:10px;">
                     <p class="text-center">
-                        <span class="menu_text" :class="current_index==0?'menu_text_active menu_text':'menu_text'" @click="current_index=0;"><a>首页</a></span>
-                        <span class="menu_text" :class="current_index==1?'menu_text_active menu_text':'menu_text'" @click="current_index=1;"><a>文档</a></span>
+                        <span class="menu_text" :class="current_index==0?'menu_text_active menu_text':'menu_text'"
+                            @click="current_index=0;"><a>首页</a></span>
+                        <span class="menu_text" :class="current_index==1?'menu_text_active menu_text':'menu_text'"
+                            @click="current_index=1;"><a>文档</a></span>
                     </p>
                 </div>
             </div>
@@ -63,12 +73,12 @@
                     <img width="100%" class="img-responsive" src='.\image\index0.jpg' />
                     <img width="100%" class="img-responsive" src='.\image\index1.jpg' />
                     <img width="100%" class="img-responsive" src='.\image\index2.jpg' />
+                    <img width="100%" class="img-responsive" src='.\image\index3.jpg' />
                     <img width="100%" class="img-responsive" src='.\image\index99.jpg' />
                 </div>
             </div>
             <div v-if="current_index==1" class="row" key="document">
-                <iframe src="document.html" style="width: 100%;height:9999px;" frameborder=0 border=0>
-
+                <iframe src=".\html\document.html" style="width: 100%;height:9999px;" frameborder=0 border=0>
                 </iframe>
             </div>
         </transition>
@@ -78,14 +88,16 @@
         var vm = new Vue({
             el: '#app',
             data: {
-                current_index: 0,
+                current_index: -1,
             },
             methods: {
 
-            },
-
+            }
         });
 
+        window.addEventListener("load", function () {
+            vm.current_index=0;
+        }, false);
     </script>
 </body>
 

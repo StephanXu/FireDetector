@@ -20,6 +20,13 @@ Fire Detector 是基于深度学习技术的火灾及烟雾检测解决方案。
 
 高达92%准确率的核心卷积神经网络为 Fire Detector 提供了精准的判别引擎。基于 MobileNet 网络结构使得存储整个神经网络仅仅只需要十余兆字节空间，运行它更是只需要更低的内存和性能开销。
 
+经过训练后的网络权重文件仅仅只有**12.3MB**大小。而精确度却能够达到**94%。**
+
+### 文件
+
+- 运行效果：链接：https://pan.baidu.com/s/1-u626h0VbHV1XbjJ8wiDoQ  提取码：tmoy 
+- 模型：example/example_model.caffemodel
+
 ## 设计
 
 Fire Detector 为烟火识别提供了两套解决方案，利用卷积神经网络将视频的整帧图像作为输入进行识别，并给出明火（Fire）、正常（Normal）和烟雾（Smoke）三种现实情况的概率，在输出的图像当中使用红色、绿色和蓝色对三种情况进行区别，可以帮助用户更加清晰地辨别。
@@ -133,7 +140,9 @@ options:
 | Caffe_INCLUDE_DIRS | Caffe头文件路径，通常为`/path/to/caffe/include`|
 | Caffe_BUILD_INCLUDE_DIRS | Caffe编译后头文件路径，通常为`/path/to/caffe/build/include`|
 
-## 数据集来源
+## 训练数据
+
+### 数据集来源
 
 在 Fire Detector 的开发过程中，我们从以下渠道获得了训练和测试数据集。
 
@@ -146,6 +155,10 @@ options:
   - http://www.image-net.org
 - 其他
   - http://signal.ee.bilkent.edu.tr/VisiFire/Demo/SampleClips.html
+
+### 训练平台
+
+Fire Detector 开发小组目前使用 Geforce GTX 1080Ti 进行训练。并在加入了Depth-wise卷积方法的Caffe中进行训练，同样，运行环境也需要支持Depth-wise卷积的Caffe深度学习框架。
 
 ## 开发计划
 
