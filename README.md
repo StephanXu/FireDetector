@@ -1,21 +1,7 @@
 # Fire Detector
 
-[TOC]
-
 > 基于Caffe深度学习框架的火灾烟雾检测系统
 >
-
-**查看更详细的内容，请查看`doc`文件夹下的文档。**
-
-![img1](./doc/image/index0.jpg)
-
-![img2](./doc/image/index1.jpg)
-
-![img3](./doc/image/index2.jpg)
-
-![img4](./doc/image/index3.jpg)
-
-![img5](./doc/image/index99.jpg)
 
 ## 介绍
 
